@@ -16,23 +16,26 @@
         }
 
         #intercom-container {
-            width: 420px;
+            width: 90%;
             margin: auto;
             padding: 20px;
             background: #333;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
         }
 
-        #channels {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        #groups {
+            display: flex;
+            flex-wrap: wrap;
             gap: 10px;
-            margin-top: 20px;
+            justify-content: center;
         }
 
-        .channel {
-            width: 120px;
+        .group {
+            width: 150px;
             height: 50px;
             background: red;
             color: white;
@@ -44,14 +47,23 @@
             cursor: pointer;
         }
 
-        .channel.active {
+        .group.active {
             background: green;
         }
 
-        #mute {
-            width: 120px;
-            height: 50px;
-            margin-top: 20px;
+        .volume-control {
+            width: 100px;
+        }
+
+        #user-list {
+            width: 200px;
+            background: #444;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: left;
+        }
+
+        #mute-mic {
             background: gray;
             color: white;
             font-size: 16px;
@@ -59,38 +71,45 @@
             border-radius: 5px;
             transition: background 0.3s;
             cursor: pointer;
+            padding: 10px;
         }
 
-        #mute.active {
+        #mute-mic.active {
             background: darkred;
         }
     </style>
 </head>
 <body>
     <div id="intercom-container">
-        <h1>Intercom Panel</h1>
-        <div id="channels">
-            <button class="channel" id="ch1">Talk 1</button>
-            <button class="channel" id="ch2">Talk 2</button>
-            <button class="channel" id="ch3">Talk 3</button>
-            <button class="channel" id="ch4">Talk 4</button>
-            <button class="channel" id="ch5">Talk 5</button>
-            <button class="channel" id="ch6">Talk 6</button>
-            <button class="channel" id="ch7">Talk 7</button>
-            <button class="channel" id="ch8">Talk 8</button>
-            <button class="channel" id="ch9">Talk 9</button>
-            <button class="channel" id="ch10">Talk 10</button>
-            <button class="channel" id="ch11">Talk 11</button>
-            <button class="channel" id="ch12">Talk 12</button>
+        <div>
+            <h2>Productions</h2>
+            <div id="groups">
+                <button class="group" id="grp1">Production 1</button>
+                <button class="group" id="grp2">Production 2</button>
+                <button class="group" id="grp3">Production 3</button>
+            </div>
         </div>
-        <div id="controls">
-            <button id="mute">Mute</button>
+
+        <div>
+            <h2>Connected Users</h2>
+            <div id="user-list">
+                <p>User 1</p>
+                <p>User 2</p>
+                <p>User 3</p>
+            </div>
+        </div>
+
+        <div>
+            <h2>Controls</h2>
+            <button id="mute-mic">Mute Mic</button>
+            <h3>Volume</h3>
+            <input type="range" class="volume-control" min="0" max="100">
         </div>
     </div>
 
     <script>
         let muteState = false;
-        let currentTalkChannel = null;
+        let activeGroup = null;
         let stream = null;
 
         async function setupAudio() {
@@ -103,46 +122,20 @@
             }
         }
 
-        document.querySelectorAll('.channel').forEach(button => {
-            button.addEventListener("mousedown", () => {
-                startTalking(button.id);
-            });
-
-            button.addEventListener("mouseup", () => {
-                stopTalking(button.id);
-            });
-
-            button.addEventListener("mouseleave", () => {
-                stopTalking(button.id);
+        document.querySelectorAll('.group').forEach(button => {
+            button.addEventListener("click", () => {
+                if (activeGroup) {
+                    document.getElementById(activeGroup).classList.remove("active");
+                }
+                activeGroup = button.id;
+                button.classList.add("active");
+                console.log("Latched to", button.id);
             });
         });
 
-        function startTalking(channelId) {
-            if (!stream) return alert("Microphone not available.");
-            if (muteState) return;
-            
-            currentTalkChannel = channelId;
-            document.getElementById(channelId).classList.add("active");
-
-            // Simulate VDO.Ninja command to enable mic
-            console.log("Talking on", channelId);
-        }
-
-        function stopTalking(channelId) {
-            if (currentTalkChannel === channelId) {
-                document.getElementById(channelId).classList.remove("active");
-                currentTalkChannel = null;
-
-                // Simulate VDO.Ninja command to disable mic
-                console.log("Stopped talking on", channelId);
-            }
-        }
-
-        document.getElementById("mute").addEventListener("click", () => {
+        document.getElementById("mute-mic").addEventListener("click", () => {
             muteState = !muteState;
-            document.getElementById("mute").classList.toggle("active");
-
-            // Simulate VDO.Ninja mute toggle
+            document.getElementById("mute-mic").classList.toggle("active");
             console.log("Mute State:", muteState);
         });
 
